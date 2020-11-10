@@ -21,7 +21,7 @@ function transformString (string, size) {
   let previousChar = '';
   const chars = string.split('');
 
-  const newArray = chars.map(function (char) {
+  const newArray = chars.map(char => {
     counter = previousChar === char ? ++counter : 0;
     if (previousChar !== char || counter < size) {
       previousChar = char;
