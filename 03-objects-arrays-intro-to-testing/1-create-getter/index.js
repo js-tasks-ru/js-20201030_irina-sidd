@@ -7,7 +7,7 @@ export function createGetter(path) {
   const pathSteps = path.split('.');
 
   const getter = obj => {
-    if(!obj || Object.keys(obj).length === 0) return undefined;
+    if(!obj || Object.keys(obj).length === 0) return;
 
     let value = {...obj};
     pathSteps.forEach(key => {

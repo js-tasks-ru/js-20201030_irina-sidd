@@ -1,18 +1,18 @@
 export default class ColumnChart {
-  value = '';
-  label = '';
-  data = [];
   chartHeight = 50;
 
-  constructor(params) {
-    if(params) {
-      for (const [param, value] of Object.entries(params)) {
-        this[param] = value;
-      }
-    }
+  constructor({
+    data = [],
+    label = '',
+    value = 0,
+    link = ''
+  } = {}) {
+    this.data = data;
+    this.label = label;
+    this.value = value;
+    this.link = link;
 
     this.render();
-    this.initEventListeners();
   }
 
   render() {
@@ -22,7 +22,7 @@ export default class ColumnChart {
     <div class="column-chart">
       <div class="column-chart__title">
         Total ${this.label}
-        <a href="/sales" class="column-chart__link">View all</a>
+        ${this.getLink()}
       </div>
       <div class="column-chart__container">
         <div data-element="header" class="column-chart__header">${this.value}</div>
@@ -33,32 +33,37 @@ export default class ColumnChart {
     `;
     this.element = element.firstElementChild;
     this.element.style = `--chart-height: ${this.chartHeight}`;
+    this.chartElement = this.element.getElementsByClassName('column-chart__chart')[0];
+    this.renderChartElement();
+  }
 
+  update(newData) {
+    if(!newData) return;
+
+    this.data = newData;
+    while (this.chartElement.firstChild) {
+      this.chartElement.removeChild(this.chartElement.firstChild);
+    }
+    this.renderChartElement();
+  }
+
+  renderChartElement() {
     if(this.data.length !== 0) {
-      const chartElement = element.getElementsByClassName('column-chart__chart')[0];
-      this.renderChart(chartElement);
+      this.chartElement.innerHTML = this.getChartColumns();
     } else {
       this.element.classList.add('column-chart_loading');
     }
   }
 
-  update(newData) {
-    this.data = newData;
-    const chartElement = this.element.getElementsByClassName('column-chart__chart')[0];
-    while (chartElement.firstChild) {
-      chartElement.removeChild(chartElement.firstChild);
-    }
-
-    this.renderChart(chartElement);
+  getChartColumns() {
+    const columnProps = this.getColumnProps(this.data);
+    return columnProps.map((item) => {
+      return `<div style="--value: ${item.value}" data-tooltip="${item.percent}"></div>`;
+    }).join('');
   }
 
-  renderChart(chartElement) {
-    const columnProps = this.getColumnProps(this.data);
-    columnProps.forEach((item) => {
-      const column = document.createElement('div');
-      column.innerHTML = `<div style="--value: ${item.value}" data-tooltip="${item.percent}"></div>`;
-      chartElement.append(column.firstElementChild);
-    });
+  getLink() {
+    return this.link ? `<a href="/sales" class="column-chart__link">View all</a>` : '';
   }
 
   getColumnProps(data) {
@@ -73,16 +78,11 @@ export default class ColumnChart {
     });
   }
 
-  initEventListeners () {
-    // NOTE: в данном методе добавляем обработчики событий, если они есть
-  }
-
   remove () {
     this.element.remove();
   }
 
   destroy() {
     this.remove();
-    // NOTE: удаляем обработчики событий, если они есть
   }
 }
